@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "easyeda-mcp-pro": {
+      "command": "C:\\Users\\Admin\\.easyeda-mcp-pro\\launch.cmd",
+      "args": [],
+      "env": {
+        "TOOL_PROFILE": "full"
+      }
+    }
+  }
+}
