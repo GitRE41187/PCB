@@ -25,3 +25,24 @@
 
 [1009/145802.004:WARNING:ui\gl\angle_platform_impl.cc:52] Shader.cpp:774 (gl::Shader::resolveCompile): Compiler log: WARNING: 0:9: '=' : global variable initializers should be constant expressions (uniforms and globals are allowed in global initializers for legacy compatibility)
 
+[1014/004919.126:WARNING:ui\gl\angle_platform_impl.cc:52] Shader.cpp:774 (gl::Shader::resolveCompile): Compiler log: WARNING: 0:9: '=' : global variable initializers should be constant expressions (uniforms and globals are allowed in global initializers for legacy compatibility)
+
+[1014/005028.585:WARNING:ui\gl\angle_platform_impl.cc:52] Shader.cpp:774 (gl::Shader::resolveCompile): Compiler log: WARNING: 0:9: '=' : global variable initializers should be constant expressions (uniforms and globals are allowed in global initializers for legacy compatibility)
+
+[1014/070148.137:WARNING:net\dns\dns_config_service_win.cc:609] Failed to read DnsConfig.
+[1014/070148.176:WARNING:net\dns\dns_config_service_win.cc:609] Failed to read DnsConfig.
+[1014/070148.236:WARNING:net\dns\dns_config_service_win.cc:609] Failed to read DnsConfig.
+[1014/070148.274:WARNING:net\dns\dns_config_service_win.cc:609] Failed to read DnsConfig.
+[1014/070148.423:WARNING:net\dns\dns_config_service_win.cc:609] Failed to read DnsConfig.
+[1014/070148.444:WARNING:net\dns\dns_config_service_win.cc:609] Failed to read DnsConfig.
+[1014/070148.468:WARNING:net\dns\dns_config_service_win.cc:609] Failed to read DnsConfig.
+[1014/070150.242:WARNING:net\dns\dns_config_service_win.cc:609] Failed to read DnsConfig.
+[1014/080755.960:WARNING:ui\gl\angle_platform_impl.cc:52] Shader.cpp:774 (gl::Shader::resolveCompile): Compiler log: WARNING: 0:9: '=' : global variable initializers should be constant expressions (uniforms and globals are allowed in global initializers for legacy compatibility)
+
+[1014/082112.874:WARNING:ui\gl\angle_platform_impl.cc:52] Shader.cpp:774 (gl::Shader::resolveCompile): Compiler log: WARNING: 0:9: '=' : global variable initializers should be constant expressions (uniforms and globals are allowed in global initializers for legacy compatibility)
+ (No more compiler logs will be reported in logs)
+[1014/093940.054:WARNING:ui\gl\angle_platform_impl.cc:52] Shader.cpp:774 (gl::Shader::resolveCompile): Compiler log: WARNING: 0:9: '=' : global variable initializers should be constant expressions (uniforms and globals are allowed in global initializers for legacy compatibility)
+
+[1014/102136.275:WARNING:ui\gl\angle_platform_impl.cc:52] Shader.cpp:774 (gl::Shader::resolveCompile): Compiler log: WARNING: 0:9: '=' : global variable initializers should be constant expressions (uniforms and globals are allowed in global initializers for legacy compatibility)
+
+[1014/134022.192:WARNING:pdf\pdfium\pdfium_font_win.cc:117] Failed to lookup face `53696D486569` for charset 134, weight 400
