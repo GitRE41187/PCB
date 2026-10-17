@@ -46,3 +46,4 @@
 [1014/102136.275:WARNING:ui\gl\angle_platform_impl.cc:52] Shader.cpp:774 (gl::Shader::resolveCompile): Compiler log: WARNING: 0:9: '=' : global variable initializers should be constant expressions (uniforms and globals are allowed in global initializers for legacy compatibility)
 
 [1014/134022.192:WARNING:pdf\pdfium\pdfium_font_win.cc:117] Failed to lookup face `53696D486569` for charset 134, weight 400
+[1018/014840.054:WARNING:pdf\pdfium\pdfium_font_win.cc:117] Failed to lookup face `53696D486569` for charset 134, weight 400
