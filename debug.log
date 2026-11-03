@@ -47,3 +47,7 @@
 
 [1014/134022.192:WARNING:pdf\pdfium\pdfium_font_win.cc:117] Failed to lookup face `53696D486569` for charset 134, weight 400
 [1018/014840.054:WARNING:pdf\pdfium\pdfium_font_win.cc:117] Failed to lookup face `53696D486569` for charset 134, weight 400
+[1103/093214.070:WARNING:net\dns\dns_config_service_win.cc:609] Failed to read DnsConfig.
+[1103/093214.450:WARNING:net\dns\dns_config_service_win.cc:609] Failed to read DnsConfig.
+[1103/093214.552:WARNING:net\dns\dns_config_service_win.cc:609] Failed to read DnsConfig.
+[1103/093214.659:WARNING:net\dns\dns_config_service_win.cc:609] Failed to read DnsConfig.
