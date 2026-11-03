@@ -51,3 +51,5 @@
 [1103/093214.450:WARNING:net\dns\dns_config_service_win.cc:609] Failed to read DnsConfig.
 [1103/093214.552:WARNING:net\dns\dns_config_service_win.cc:609] Failed to read DnsConfig.
 [1103/093214.659:WARNING:net\dns\dns_config_service_win.cc:609] Failed to read DnsConfig.
+[1103/095047.776:WARNING:ui\gl\angle_platform_impl.cc:52] Shader.cpp:774 (gl::Shader::resolveCompile): Compiler log: WARNING: 0:9: '=' : global variable initializers should be constant expressions (uniforms and globals are allowed in global initializers for legacy compatibility)
+
