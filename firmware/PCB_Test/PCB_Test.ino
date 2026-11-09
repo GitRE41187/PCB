@@ -62,7 +62,7 @@ enum TestId : uint8_t { T_BUS, T_SHORT, T_SCAN, T_PCF, T_SR, T_ADC, T_SW, T_LCD,
 const char *const TEST_NAME[T_COUNT] = {
   "I2C bus + ไฟ +3V3 (R2, R3)",
   "ลัดวงจรระหว่างขา GPIO",
-  "สแกน I2C",
+  "สแกน I2C (ต้องเจอ U3)",
   "PCF8574 U3 + LED1-4 + SW1-2",
   "74HC595 U1 + LED5-12",
   "MCP3208 U2 + AIN0-7",
@@ -266,9 +266,22 @@ void scanI2c(bool verbose) {
   }
 }
 
+void printFound(const char *name, uint8_t addr) {
+  if (addr) Serial.printf("  %s : พบที่ 0x%02X\n", name, addr);
+  else Serial.printf("  %s : ไม่พบ\n", name);
+}
+
 void testScan() {
   title(T_SCAN);
   scanI2c(true);
+  Serial.println("สรุปอุปกรณ์บนบัส (ข้อนี้ตัดสินผ่าน/ไม่ผ่านจาก U3 อย่างเดียว ส่วนโมดูลดูในเทส I-K):");
+  printFound("U3 PCF8574 บนบอร์ด", addrPcf);
+  printFound("OLED ที่ J3", addrOled);
+  printFound("จอ LCD I2C ที่ J4", addrLcdI2c);
+  printFound("ADS1115 ที่ J5", addrAds);
+  if (!addrPcf && !addrOled && !addrLcdI2c && !addrAds) {
+    Serial.println("ไม่มีอุปกรณ์ตอบเลย: ถ้าเทส A ผ่าน ให้เช็กว่าสาย IO21/IO22 ไม่สลับกันที่ H4");
+  }
   if (!addrPcf) {
     Serial.println("ไม่พบ U3: H5 (A0-A2) ลอยอยู่บนบอร์ด ต้องต่อลง GND ทั้ง 3 ขา (ได้ 0x20)");
     Serial.println("ถ้าต่อแล้วยังไม่เจอ ให้เช็กทิศ IC, ไฟที่ U3.16 และการบัดกรีขา 14, 15");
@@ -422,6 +435,7 @@ void testSr() {
 AdcFrame adcRead(uint8_t ch) {
   AdcFrame f;
   SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
+
   digitalWrite(PIN_ADC_CS, LOW);
   f.rx0 = SPI.transfer(0x06 | (ch >> 2));
   f.rx1 = SPI.transfer((ch & 0x03) << 6);
@@ -514,16 +528,16 @@ void lcdPrintLine(LcdSendFn send, uint8_t line, const char *text) {
 
 // ---------- 8. LCD1602 DS1 แบบ 4 บิต ----------
 void lcdGpioSend(uint8_t nibble, bool rs) {
-  digitalWrite(PIN_LCD_RS, rs);
-  digitalWrite(PIN_LCD_D4, nibble & 0x01);
-  digitalWrite(PIN_LCD_D5, nibble & 0x02);
-  digitalWrite(PIN_LCD_D6, nibble & 0x04);
-  digitalWrite(PIN_LCD_D7, nibble & 0x08);
-  delayMicroseconds(1);
+  digitalWrite(PIN_LCD_RS, rs ? HIGH : LOW);
+  digitalWrite(PIN_LCD_D4, (nibble & 0x01) ? HIGH : LOW);
+  digitalWrite(PIN_LCD_D5, (nibble & 0x02) ? HIGH : LOW);
+  digitalWrite(PIN_LCD_D6, (nibble & 0x04) ? HIGH : LOW);
+  digitalWrite(PIN_LCD_D7, (nibble & 0x08) ? HIGH : LOW);
+  delayMicroseconds(5);
   digitalWrite(PIN_LCD_EN, HIGH);
-  delayMicroseconds(1);
+  delayMicroseconds(5);  // จอบางรุ่นต้องการ EN นานกว่าสเปก HD44780 (450 ns)
   digitalWrite(PIN_LCD_EN, LOW);
-  delayMicroseconds(50);
+  delayMicroseconds(100);
 }
 
 void testLcd() {
@@ -534,7 +548,56 @@ void testLcd() {
   lcdPrintLine(lcdGpioSend, 0, "ABCDEFGHIJKLMNOP");
   lcdPrintLine(lcdGpioSend, 1, "0123456789 TEST!");
   setResult(T_LCD, visualResult("จอแสดง ABCDEFGHIJKLMNOP / 0123456789 TEST! ถูกต้องใช่ไหม?",
-                                "ไม่มีอะไรเลย = ไฟ +5V หรือ RV1, สี่เหลี่ยมทึบบรรทัดเดียว = สาย RS/EN/D4-D7, ตัวอักษรเพี้ยน = D4-D7 สลับหรือลัด"));
+                                "ไม่มีอะไรเลย = ไฟจอขา 1-2 หรือ RV1, สี่เหลี่ยมทึบบรรทัดเดียว = สาย RS/EN/D4-D7, ตัวอักษรเพี้ยน = D4-D7 สลับหรือลัด\nพิมพ์ l เพื่อไล่วัดขา LCD ทีละขาด้วยมิเตอร์"));
+}
+
+// ---------- ไล่วัดขา LCD ด้วยมิเตอร์ ----------
+// ขาที่เลือกจะสลับ 0 V / 3.3 V ทุกครึ่งวินาที ขาอื่นเป็น LOW
+// ถ้าสายไม่ถึงจอ ขา RS และ D4-D7 จะค้างราว 5 V เพราะในจอมี pull-up
+void lcdPinWalk() {
+  Serial.println("\n--- ไล่วัดขา LCD ด้วยมิเตอร์ ---");
+  Serial.println("ตั้งมิเตอร์วัดแรงดัน DC ขั้วดำที่ GND (เช่น H19.2)");
+  Serial.println("วัดก่อน: ย้ายขั้วดำไปจอขา 1 แล้ววัดจอขา 2 ต้องได้ 4.5-5 V (ถ้าได้ 0 แปลว่าขา 1 ไม่ถึง GND) แล้วย้ายขั้วดำกลับ");
+  Serial.println("         จอขา 3 (V0) ต้องปรับ RV1 ได้ และควรอยู่ราว 0.3-1 V");
+  Serial.println("         จอขา 5 (RW) ต้องได้ 0 V ถ้าได้ราว 5 V แปลว่าขา 5 ไม่ถึง GND");
+  setPinsIdle();
+  const uint8_t pins[6] = {PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7};
+  const char *const names[6] = {"RS", "EN", "D4", "D5", "D6", "D7"};
+  const uint8_t lcdPin[6] = {4, 6, 11, 12, 13, 14};
+  uint8_t bad = 0, checked = 0;
+  for (uint8_t i = 0; i < 6; i++) {
+    flushInput();
+    Serial.printf("IO%d (%s) -> จอขา %d: ค่าต้องสลับ 0 V กับ 3.3 V ทุกครึ่งวินาที  [y = ใช่, n = ไม่, s = หยุด]\n",
+                  pins[i], names[i], lcdPin[i]);
+    char answer = 0;
+    bool level = false;
+    uint32_t lastToggle = 0;
+    uint32_t start = millis();
+    while (answer == 0 && millis() - start < ASK_TIMEOUT_MS) {
+      if (millis() - lastToggle >= 500) {
+        level = !level;
+        digitalWrite(pins[i], level ? HIGH : LOW);
+        lastToggle = millis();
+      }
+      if (Serial.available()) {
+        char c = (char)(Serial.read() | 0x20);
+        if (c == 'y' || c == 'n' || c == 's') answer = c;
+      }
+      delay(5);
+    }
+    digitalWrite(pins[i], LOW);
+    if (answer == 0 || answer == 's') break;
+    checked++;
+    if (answer == 'n') {
+      bad++;
+      Serial.printf("  %s ไม่ผ่าน: ค้างราว 5 V = สายไม่ถึงจอ, ค้าง 0 V = ลัดลง GND หรือสายหลุด, ไปสลับที่ขาอื่น = สายสลับ\n", names[i]);
+    }
+  }
+  setPinsIdle();
+  Serial.printf("วัดแล้ว %d ขา ไม่ผ่าน %d ขา\n", checked, bad);
+  if (checked == 6 && bad == 0) {
+    Serial.println("สายครบ ถ้าจอยังเป็นสี่เหลี่ยมทึบ อาจเป็นจอที่รับสัญญาณ 3.3 V ไม่ได้ (ต้องใช้วงจรแปลงระดับ)");
+  }
 }
 
 // ---------- 9. จอ LCD I2C ที่ J4 ----------
@@ -717,6 +780,7 @@ void printMenu() {
     Serial.printf("%c = %s\n", 'A' + i, TEST_NAME[i]);
   }
   Serial.println("m = ดูค่าสด (ADC, ปุ่ม)");
+  Serial.println("l = ไล่วัดขา LCD ทีละขาด้วยมิเตอร์");
   Serial.println("r = สรุปผล");
   Serial.println("w = ดูการต่อสาย");
   Serial.println("? = เมนูนี้");
@@ -778,6 +842,7 @@ void loop() {
       printSummary();
       break;
     case 'm': liveMonitor(); break;
+    case 'l': lcdPinWalk(); break;
     case 'r': printSummary(); break;
     case 'w': printWiring(); break;
     case '?': printMenu(); break;
